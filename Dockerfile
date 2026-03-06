@@ -13,8 +13,9 @@ FROM debian:bookworm-slim
 RUN apt-get update && apt-get install -y ca-certificates && rm -rf /var/lib/apt/lists/*
 COPY --from=builder /build/target/release/openfang /usr/local/bin/
 COPY --from=builder /build/agents /opt/openfang/agents
+COPY entrypoint.sh /entrypoint.sh
 EXPOSE 4200
 VOLUME /data
 ENV OPENFANG_HOME=/data
-ENTRYPOINT ["openfang"]
+ENTRYPOINT ["/entrypoint.sh"]
 CMD ["start"]
