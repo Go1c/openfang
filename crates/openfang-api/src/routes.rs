@@ -3339,6 +3339,20 @@ fn clawhub_browse_entry_to_json(
 // Hands endpoints
 // ---------------------------------------------------------------------------
 
+/// Detect whether the current process is running as root (uid 0).
+/// On non-Unix platforms always returns false.
+fn is_root_user() -> bool {
+    #[cfg(unix)]
+    {
+        // SAFETY: getuid() is always safe to call.
+        unsafe { libc::getuid() == 0 }
+    }
+    #[cfg(not(unix))]
+    {
+        false
+    }
+}
+
 /// Detect the server platform for install command selection.
 fn server_platform() -> &'static str {
     if cfg!(target_os = "macos") {
@@ -3602,6 +3616,9 @@ pub async fn install_hand_deps(
         // For winget on Windows, add --accept flags to avoid interactive prompts
         let final_cmd = if cfg!(windows) && cmd.starts_with("winget ") {
             format!("{cmd} --accept-source-agreements --accept-package-agreements")
+        } else if !cfg!(windows) && cmd.starts_with("sudo ") && is_root_user() {
+            // Running as root: sudo is unnecessary and may not be installed
+            cmd.strip_prefix("sudo ").unwrap_or(cmd).to_string()
         } else {
             cmd.to_string()
         };

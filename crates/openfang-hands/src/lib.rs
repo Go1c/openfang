@@ -112,6 +112,10 @@ pub struct HandRequirement {
     pub requirement_type: RequirementType,
     /// The value to check (binary name, env var name, etc.).
     pub check_value: String,
+    /// Additional fallback values to check (any match = satisfied).
+    /// Useful for binaries with multiple names (e.g. "python3" and "python").
+    #[serde(default)]
+    pub check_values: Vec<String>,
     /// Human-readable description of why this is needed.
     #[serde(default)]
     pub description: Option<String>,
