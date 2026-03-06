@@ -311,8 +311,9 @@ impl Default for HandRegistry {
 fn check_requirement(req: &HandRequirement) -> bool {
     match req.requirement_type {
         RequirementType::Binary => {
-            // Check if binary exists on PATH
+            // Check primary value, then any fallback check_values
             which_binary(&req.check_value)
+                || req.check_values.iter().any(|v| which_binary(v))
         }
         RequirementType::EnvVar | RequirementType::ApiKey => {
             // Check if env var is set and non-empty
